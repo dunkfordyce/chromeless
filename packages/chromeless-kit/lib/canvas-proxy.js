@@ -62,3 +62,60 @@ exports.snapshot = function Snapshot(frame) {
   ctx.drawWindow(window, window.scrollX, window.scrollY, snippetWidth, snippetWidth * aspectRatio, "rgb(255,255,255)");
   return thumbnail.toDataURL("image/png");
 }
+
+exports.snapshot2 = function Snapshot(frame) {
+  var window = frame.contentWindow;
+  var thumbnail = window.document.createElementNS(XHTML_NS, "canvas");
+  thumbnail.mozOpaque = true;
+  thumbnail.width = window.innerWidth;
+  thumbnail.height = window.innerHeight;
+  var ctx = thumbnail.getContext("2d");
+    console.log('ss2', 0, 0, window.innerWidth, window.innerHeight);
+  ctx.drawWindow(window, 0, 0, window.innerWidth, window.innerHeight, "rgb(255,255,255)");
+ 
+  return thumbnail.toDataURL("image/png");
+}
+
+
+function saveCanvas(canvas, destFile) {
+  // convert string filepath to an nsIFile
+  var file = Cc["@mozilla.org/file/local;1"]
+                       .createInstance(Ci.nsILocalFile);
+  file.initWithPath(destFile);
+
+  // create a data url from the canvas and then create URIs of the source and targets  
+  var io = Cc["@mozilla.org/network/io-service;1"]
+                     .getService(Ci.nsIIOService);
+  var source = io.newURI(canvas.toDataURL("image/png", ""), "UTF8", null);
+  var target = io.newFileURI(file)
+    
+  // prepare to save the canvas data
+  var persist = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+                          .createInstance(Ci.nsIWebBrowserPersist);
+  
+  persist.persistFlags = Ci.nsIWebBrowserPersist.PERSIST_FLAGS_REPLACE_EXISTING_FILES;
+  persist.persistFlags |= Ci.nsIWebBrowserPersist.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+  
+  // displays a download dialog (remove these 3 lines for silent download)
+  //var xfer = Cc["@mozilla.org/transfer;1"]
+  //                     .createInstance(Ci.nsITransfer);
+  //xfer.init(source, target, "", null, null, null, persist);
+  //persist.progressListener = xfer;
+  
+  // save the canvas data to the file
+  persist.saveURI(source, null, null, null, null, file);
+}
+
+exports.snapshot3 = function Snapshot(frame, fn) {
+  var window = frame.contentWindow;
+  var thumbnail = window.document.createElementNS(XHTML_NS, "canvas");
+  thumbnail.mozOpaque = true;
+  thumbnail.width = window.innerWidth;
+  thumbnail.height = window.innerHeight;
+  var ctx = thumbnail.getContext("2d");
+  ctx.drawWindow(window, 0, 0, window.innerWidth, window.innerHeight, "rgb(255,255,255)");
+
+    saveCanvas(thumbnail, fn);
+ 
+  //return thumbnail.toDataURL("image/png");
+}
