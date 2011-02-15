@@ -46,6 +46,7 @@ const {Cc, Ci, Cr} = require("chrome");
 exports.stopload = function(frame) { 
   var webNav= frame.contentWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIWebNavigation);
   webNav.stop(webNav.STOP_ALL);
+    console.log(webNav);
 };
 
 /**
@@ -55,4 +56,28 @@ exports.stopload = function(frame) {
  */
 exports.title = function getIframeTitle(frame) {
   return frame.contentDocument.title;
+};
+
+exports.emit = function emitiframeevent(frame, elid, evname, data) { 
+  var doc = frame.contentDocument;                                                                       
+  var elm = doc.getElementById(elid);                                                                         
+  if (elm && "createEvent" in doc) {                                                                            
+        var evt = doc.createEvent("Events");                                                                        
+        evt.initEvent(evname, true, false);                                                                      
+        if( data !== undefined ) { 
+            elm.setAttribute("myextra", data);
+        }
+        elm.dispatchEvent(evt);             
+    }
+};
+
+exports.listen = function listevenevent(frame, elid, evname, cb) { 
+    var doc = frame.contentDocument;
+    doc.addEventListener(evname, cb, false, true);
+};
+
+exports.install_console = function(frame) { 
+    console.log('installing console to frame');
+    frame.contentWindow.myfunc = console;
+    console.log('console is',frame.contentWindow.myfunc);
 };
