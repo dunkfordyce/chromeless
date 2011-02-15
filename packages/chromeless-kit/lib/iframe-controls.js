@@ -54,7 +54,7 @@ exports.stopload = function(frame) {
  * @params {IFrameNode} frame An iframe dom node.
  * @returns {string} The current title of the content in the iframe.
  */
-exports.title = function getIframeTitle(frame) {
+exports.title = function(frame) {
   return frame.contentDocument.title;
 };
 
@@ -80,4 +80,15 @@ exports.install_console = function(frame) {
     console.log('installing console to frame');
     frame.contentWindow.myfunc = console;
     console.log('console is',frame.contentWindow.myfunc);
+
+/**
+ * inject a function into a web content window
+ * @params {IFrameNode} frame An iframe dom node.
+ * @params {string} attachPoint the property of `window.` to which this function shall be
+ * attached.
+ * @params {function} callback The function that will be invoked when content in the
+ * iframe invokes this function.
+ */
+exports.inject = function(frame, attach, func) {
+  frame.contentWindow.wrappedJSObject[attach] = func;
 };
